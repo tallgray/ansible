@@ -1,0 +1,11 @@
+localhost
+
+[ubuntu_servers]
+minikube
+ansible
+git
+docker
+serverless
+
+[rhel_servers]
+ansible-aap
