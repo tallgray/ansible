@@ -1,0 +1,29 @@
+---
+- name: Create sudo user, set no password required and copy SSH key from current user
+  hosts: all
+  become: true
+  tasks:
+
+  - name: Add the user 'ansible' with a bash shell, appending the group 'adm' and 'sudo' to the user's groups
+    ansible.builtin.user:
+      name: ansible
+      password: $6$0f4ATPdSXDRm2Neh$5xYrLHk9XSkfKmonp/q09WqydLX9xBc7q02QZNGDrWXhpTmAWEkw5nL6lPCPQXelRRY841qfhJLdJXen36AYk.
+      shell: /bin/bash
+      groups: adm,sudo,wheel
+      append: true
+    when: ansible_distribution == "Ubuntu"
+  - name: Set authorized key for user ansible copying it from current user
+    ansible.posix.authorized_key:
+      user: ansible
+      state: present
+      key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/ansible.pub') }}"
+    when: ansible_distribution == "Ubuntu"
+  - name: Set authorized key for user ansible copying it from current user
+    lineinfile:
+      path: /etc/sudoers
+      state: present
+      regexp: '^%sudo'
+      line: '%sudo ALL=(ALL) NOPASSWD: ALL'
+      line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+      validate: 'visudo -cf %s'
+    when: ansible_distribution == "Ubuntu"
