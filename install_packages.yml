@@ -7,9 +7,9 @@
     ansible.builtin.apt:
       update_cache: yes
       name:
-        dnsutils
-        nano
-        python3
+        - dnsutils
+        - nano
+        - python3
       state: latest
     when: ansible_distribution == "Ubuntu"
 
