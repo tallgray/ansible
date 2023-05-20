@@ -4,6 +4,9 @@ ansible
 git1
 docker
 serverless
+docker2
+k8s
+kali
 
 [rhel_servers]
 ansible-aap
