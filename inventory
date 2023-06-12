@@ -1,14 +1,17 @@
 [ubuntu_servers]
-minik
 ansible
 git
+
+[docker_hosts]
 docker
 docker1
 docker2
 
-[ubuntu_workstations]
-ubu
-ubuntu
+[kubernetes]
+minik
+
+[file_servers]
+omv1
 
 [ubuntu_aws]
 
