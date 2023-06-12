@@ -4,6 +4,7 @@
   become: true
   vars:
     create_username: "{{ user }}"
+    password: $6$hWLIHdbKYlUGXMes$dk//saWhiHfhp43lQ8m0L851FYCQeg8ZCnC7h/8MZ4ilWl87CGSoOlQcF1UWC0kMyk5oiV8vHSbX2TQyFEFGU.
 
   tasks:
     - name: Setup passwordless sudo
@@ -14,14 +15,25 @@
         line: '%sudo ALL=(ALL) NOPASSWD: ALL'
         validate: '/usr/sbin/visudo -cf %s'
 
-    - name: Create a new regular user with sudo privileges
+    - name: Create a new regular user with sudo privileges in Ubuntu
       user:
         name: "{{ create_username }}"
+        password: "{{ password }}"
         state: present
         groups: sudo
         append: true
         create_home: true
       when: ansible_distribution == "Ubuntu"
+
+    - name: Create a new regular user with sudo privileges in RHEL
+      user:
+        name: "{{ create_username }}"
+        password: "{{ password }}"
+        state: present
+        groups: wheel
+        append: true
+        create_home: true
+      when: ansible_distribution == "RedHat"
 
     - name: Set authorized key for remote user
       ansible.posix.authorized_key:
