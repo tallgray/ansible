@@ -1,0 +1,96 @@
+---
+- hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks: 
+  - name: Install updates (RedHat)
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "RedHat"
+
+  - name: Install updates (Ubuntu)
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+  tasks:
+  - name: Install required system packages (Ubuntu)
+    tags: nano, apt-transport-https, ca-certificates, curl, software-properties-common, python3, pip
+    package:
+      name:
+        - apt-transport-https
+        - nano
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - python3-pip
+        - python3-setuptools
+      state: latest
+      update_cache: true
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Install required system packages (RedHat)
+    tags: nano, ca-certificates, curl, python3, pip
+    package:
+      name:
+        - ca-certificates
+        - nano
+        - curl
+        - python3-pip
+        - python3-setuptools
+      state: latest
+      update_cache: true
+    when: ansible_distribution == "RedHat"
+
+- hosts: docker_hosts,kubernetes
+  become: true
+  vars:
+    terraform_version: 1.5.0
+  tasks:
+
+  - name: Install required packages for Docker on (Ubuntu) docker hosts
+    package:
+      name:
+        - unzip
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+        - docker-compose
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/{{terraform_version}}/terraform_{{terraform_version}}_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: docker
+
+- hosts: kubernetes
+  become: true
+  tasks:
+
+  - name: Install required packages for Minikube on (Ubuntu) kubernetes hosts
+    package:
+      name:
+        - minikube
+        - helm
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: file_servers
+  become: true
+  tasks:
+  - name: Install required packages for Samba on (Ubuntu) file servers
+    package:
+      name:
+        - samba
+      state: latest
+    when: ansible_distribution == "Ubuntu"
