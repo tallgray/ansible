@@ -1,9 +1,9 @@
 ---
 - hosts: all
+  gather_facts: true
   become: true
-  gather_facts: false
   vars:
-    created_username: "{{ user }}"
+    create_username: "{{ user }}"
 
   tasks:
     - name: Setup passwordless sudo
@@ -16,17 +16,18 @@
 
     - name: Create a new regular user with sudo privileges
       user:
-        name: "{{ created_username }}"
+        name: "{{ create_username }}"
         state: present
         groups: sudo
         append: true
         create_home: true
+      when: ansible_distribution == "Ubuntu"
 
     - name: Set authorized key for remote user
       ansible.posix.authorized_key:
-        user: "{{ created_username }}"
+        user: "{{ create_username }}"
         state: present
-        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_{{ created_username }}.pub') }}"
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_{{ create_username }}.pub') }}"
 
     - name: Disable password authentication for root
       lineinfile:
