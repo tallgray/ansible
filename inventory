@@ -10,8 +10,11 @@ docker2
 ubu
 ubuntu
 
-[rhel_servers]
+[ubuntu_aws]
 
+
+[rhel_servers]
+ansible-aap
 
 [windows_servers]
 
