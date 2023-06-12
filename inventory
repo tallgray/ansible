@@ -1,12 +1,19 @@
 [ubuntu_servers]
-minikube
+minik
 ansible
-git1
+git
 docker
-serverless
+docker1
 docker2
-k8s
+
+[ubuntu_workstations]
+ubu
 ubuntu
 
 [rhel_servers]
-ansible-aap
+
+
+[windows_servers]
+
+
+[windows_workstations]
