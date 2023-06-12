@@ -1,16 +1,11 @@
 ---
 - hosts: all
   become: true
+  gather_facts: false
   vars:
-    created_username: ansible
+    created_username: "{{ user }}"
 
   tasks:
-    - name: Install aptitude
-      apt:
-        name: aptitude
-        state: latest
-        update_cache: true
-
     - name: Setup passwordless sudo
       lineinfile:
         path: /etc/sudoers
@@ -31,7 +26,7 @@
       ansible.posix.authorized_key:
         user: "{{ created_username }}"
         state: present
-        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ansible.pub') }}"
+        key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_{{ created_username }}.pub') }}"
 
     - name: Disable password authentication for root
       lineinfile:
@@ -39,23 +34,3 @@
         state: present
         regexp: '^#?PermitRootLogin'
         line: 'PermitRootLogin prohibit-password'
-
-    - name: Update apt and install required system packages
-      apt:
-        pkg:
-          - curl
-          - nano
-          - git
-          - ufw
-        state: latest
-        update_cache: true
-
-    - name: UFW - Allow SSH connections
-      community.general.ufw:
-        rule: allow
-        name: OpenSSH
-
-    - name: UFW - Enable and deny by default
-      community.general.ufw:
-        state: enabled
-        default: deny
