@@ -1,8 +1,9 @@
 ---
 - hosts: all
+  gather_facts: false
   become: true
   vars:
-    created_username: ansible
+    create_username: ansible
 
   tasks:
     - name: Install aptitude
@@ -21,15 +22,15 @@
 
     - name: Create a new regular user with sudo privileges
       user:
-        name: "{{ created_username }}"
+        name: "{{ create_username }}"
         state: present
         groups: sudo
         append: true
-        create_home: true
+        create_home: false
 
     - name: Set authorized key for remote user
       ansible.posix.authorized_key:
-        user: "{{ created_username }}"
+        user: "{{ create_username }}"
         state: present
         key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ansible.pub') }}"
 
