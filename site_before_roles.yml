@@ -4,13 +4,13 @@
   gather_facts: true
 
   pre_tasks: 
-  - name: Install updates (Centos)
+  - name: install updates (Centos)
     dnf:
       update_only: yes
       update_cache: yes
     when: ansible_distribution == "Centos"
 
-  - name: Install updates (Ubuntu)
+  - name: install updates (Ubuntu)
     apt:
       upgrade: dist
       update_cache: yes
@@ -20,11 +20,12 @@
   become: true
   tasks:
 
-  - name: Create ansible user
+  - name: create ansible user
     tags: always
     user:
       name: ansible
       groups: root
+      create_home: false
 
   - name: add ssh key for ansible
     tags: always
@@ -42,7 +43,7 @@
       mode: 0440
 
   tasks:
-  - name: Install required system packages (Ubuntu)
+  - name: install required system packages (Ubuntu)
     tags: nano, apt-transport-https, ca-certificates, curl, software-properties-common, python3, pip
     package:
       name:
@@ -57,7 +58,7 @@
       update_cache: true
     when: ansible_distribution == "Ubuntu"
 
-  - name: Install required system packages (Centos)
+  - name: install required system packages (Centos)
     tags: nano, ca-certificates, curl, python3, pip
     package:
       name:
@@ -70,13 +71,13 @@
       update_cache: true
     when: ansible_distribution == "Centos"
 
-- hosts: master,workers,kubernetes
+- hosts: master,workers,k8s
   become: true
   vars:
     terraform_version: 1.5.0
   tasks:
 
-  - name: Install required packages for Docker on (Ubuntu) docker hosts
+  - name: install required packages for Docker on (Ubuntu) docker hosts
     package:
       name:
         - unzip
@@ -102,7 +103,7 @@
   become: true
   tasks:
 
-  - name: Install required packages for Minikube on (Ubuntu)
+  - name: install required packages for Minikube on (Ubuntu)
     tags: minikube,helm
     package:
       name:
@@ -122,7 +123,7 @@
 - hosts: file_servers
   become: true
   tasks:
-  - name: Install required packages for Samba on (Ubuntu) file servers
+  - name: install required packages for Samba on (Ubuntu) file servers
     tags: samba
     package:
       name:
