@@ -1,0 +1,131 @@
+---
+- hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks: 
+  - name: Install updates (Centos)
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "Centos"
+
+  - name: Install updates (Ubuntu)
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Create ansible user
+    tags: always
+    user:
+      name: ansible
+      groups: root
+
+  - name: add ssh key for ansible
+    tags: always
+    authorized_key:
+      user: ansible
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPN+wxbH4oMKt/lUQ5s+Hrcyw8KMwhZqiZgTph2nD7QX ansible"
+
+  - name: add sudoers file for ansible
+    tags: always
+    copy:
+      src: sudoer_ansible
+      dest: /etc/sudoers.d/ansible
+      owner: root
+      group: root
+      mode: 0440
+
+  tasks:
+  - name: Install required system packages (Ubuntu)
+    tags: nano, apt-transport-https, ca-certificates, curl, software-properties-common, python3, pip
+    package:
+      name:
+        - apt-transport-https
+        - nano
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - python3-pip
+        - python3-setuptools
+      state: latest
+      update_cache: true
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Install required system packages (Centos)
+    tags: nano, ca-certificates, curl, python3, pip
+    package:
+      name:
+        - ca-certificates
+        - nano
+        - curl
+        - python3-pip
+        - python3-setuptools
+      state: latest
+      update_cache: true
+    when: ansible_distribution == "Centos"
+
+- hosts: master,workers,kubernetes
+  become: true
+  vars:
+    terraform_version: 1.5.0
+  tasks:
+
+  - name: Install required packages for Docker on (Ubuntu) docker hosts
+    package:
+      name:
+        - unzip
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        - docker-buildx-plugin
+        - docker-compose-plugin
+        - docker-compose
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: install terraform
+    unarchive:
+      src: https://releases.hashicorp.com/terraform/{{terraform_version}}/terraform_{{terraform_version}}_linux_amd64.zip
+      dest: /usr/local/bin
+      remote_src: yes
+      mode: 0755
+      owner: root
+      group: docker
+
+- hosts: k8s
+  become: true
+  tasks:
+
+  - name: Install required packages for Minikube on (Ubuntu)
+    tags: minikube,helm
+    package:
+      name:
+        - minikube
+        - helm
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Create a k8s namespace
+    k8s:
+      name: lab
+      api_version: v1
+      kind: Namespace
+      state: present
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: file_servers
+  become: true
+  tasks:
+  - name: Install required packages for Samba on (Ubuntu) file servers
+    tags: samba
+    package:
+      name:
+        - samba
+      state: latest
+    when: ansible_distribution == "Ubuntu"
