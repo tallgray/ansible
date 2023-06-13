@@ -1,12 +1,9 @@
-[file_servers]
-omv1
-
-[servers]
-git
-
 [workstations]
 ansible
-ubu
+ubuntu
+
+[file_servers]
+samba1
 
 [master]
 docker
@@ -15,7 +12,7 @@ docker
 docker1
 docker2
 
-[kubernetes]
+[k8s]
 minik
 
 [aws]
