@@ -2,13 +2,11 @@
 omv1
 
 [servers]
-ansible-aap
 git
 
 [workstations]
 ansible
 ubu
-ubuntu
 
 [master]
 docker
