@@ -16,6 +16,32 @@
       update_cache: yes
     when: ansible_distribution == "Ubuntu"
 
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Create simone user
+    tags: always
+    user:
+      name: simone
+      groups: root
+
+  - name: add ssh key for simone
+    tags: always
+    authorized_key:
+      user: simone
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfXYuilhqZZnTUOP3JHXEmmBdDEKJvR/AEHvryQpIc2 simone"
+
+  - name: add sudoers file for simone
+    tags: always
+    copy:
+      src: sudoer_simone
+      dest: /etc/sudoers.d/simone
+      owner: root
+      group: root
+      mode: 0440
+
+
   tasks:
   - name: Install required system packages (Ubuntu)
     tags: nano, apt-transport-https, ca-certificates, curl, software-properties-common, python3, pip
@@ -77,12 +103,21 @@
   become: true
   tasks:
 
-  - name: Install required packages for Minikube on (Ubuntu) kubernetes hosts
+  - name: Install required packages for Minikube on (Ubuntu)
+    tags: minikube,helm
     package:
       name:
         - minikube
         - helm
       state: latest
+    when: ansible_distribution == "Ubuntu"
+
+  - name: Create a k8s namespace
+    k8s:
+      name: lab
+      api_version: v1
+      kind: Namespace
+      state: present
     when: ansible_distribution == "Ubuntu"
 
 - hosts: file_servers
