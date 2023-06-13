@@ -1,9 +1,8 @@
 ---
 - hosts: all
   become: true
-  gather_facts: true
-
   pre_tasks: 
+
   - name: update repo cache (RedHat)
     tags: always
     dnf:
@@ -22,23 +21,23 @@
   become: true
   tasks:
 
-  - name: Create simone user
+  - name: Create ansible user
     tags: always
     user:
-      name: simone
+      name: ansible
       groups: root
 
-  - name: add ssh key for simone
+  - name: add ssh key for ansible
     tags: always
     authorized_key:
-      user: simone
-      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfXYuilhqZZnTUOP3JHXEmmBdDEKJvR/AEHvryQpIc2 simone"
+      user: ansible
+      key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPN+wxbH4oMKt/lUQ5s+Hrcyw8KMwhZqiZgTph2nD7QX ansible"
 
-  - name: add sudoers file for simone
+  - name: add sudoers file for ansible
     tags: always
     copy:
-      src: sudoer_simone
-      dest: /etc/sudoers.d/simone
+      src: sudoer_ansible
+      dest: /etc/sudoers.d/ansible
       owner: root
       group: root
       mode: 0440
