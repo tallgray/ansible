@@ -1,25 +1,23 @@
-[ubuntu_servers]
-ansible
+[file_servers]
+omv1
+
+[servers]
+ansible-aap
 git
 
-[docker_hosts]
+[workstations]
+ansible
+ubu
+ubuntu
+
+[master]
 docker
+
+[workers]
 docker1
 docker2
 
 [kubernetes]
 minik
 
-[file_servers]
-omv1
-
-[ubuntu_aws]
-
-
-[rhel_servers]
-ansible-aap
-
-[windows_servers]
-
-
-[windows_workstations]
+[aws]
