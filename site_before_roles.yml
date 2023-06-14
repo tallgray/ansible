@@ -1,19 +1,20 @@
 ---
 - hosts: all
   become: true
-  gather_facts: true
-
   pre_tasks: 
-  - name: install updates (Centos)
-    dnf:
-      update_only: yes
-      update_cache: yes
-    when: ansible_distribution == "Centos"
 
-  - name: install updates (Ubuntu)
-    apt:
-      upgrade: dist
+  - name: update repo cache (RedHat)
+    tags: always
+    yum:
       update_cache: yes
+    changed_when: false
+    when: ansible_distribution == "RedHat"
+
+  - name: update repo cache (Ubuntu)
+    tags: always
+    apt:
+      update_cache: yes
+    changed_when: false
     when: ansible_distribution == "Ubuntu"
 
 - hosts: all
@@ -25,7 +26,6 @@
     user:
       name: ansible
       groups: root
-      create_home: false
 
   - name: add ssh key for ansible
     tags: always
@@ -42,9 +42,8 @@
       group: root
       mode: 0440
 
-  tasks:
   - name: install required system packages (Ubuntu)
-    tags: nano, apt-transport-https, ca-certificates, curl, software-properties-common, python3, pip
+    tags: nano,apt-transport-https,ca-certificates,curl,software-properties-common,python3,pip
     package:
       name:
         - apt-transport-https
@@ -58,52 +57,77 @@
       update_cache: true
     when: ansible_distribution == "Ubuntu"
 
-  - name: install required system packages (Centos)
-    tags: nano, ca-certificates, curl, python3, pip
+  - name: install required system packages (CentOS)
+    tags: nano,ca-certificates,curl,dnf,python3,pip
     package:
       name:
         - ca-certificates
         - nano
         - curl
+        - dnf
         - python3-pip
         - python3-setuptools
       state: latest
       update_cache: true
-    when: ansible_distribution == "Centos"
+    when: ansible_distribution == "CentOS"
 
 - hosts: master,workers,k8s
   become: true
   vars:
     terraform_version: 1.5.0
+
   tasks:
 
-  - name: install required packages for Docker on (Ubuntu) docker hosts
-    package:
-      name:
-        - unzip
-        - docker-ce
-        - docker-ce-cli
-        - containerd.io
-        - docker-buildx-plugin
-        - docker-compose-plugin
-        - docker-compose
-      state: latest
-    when: ansible_distribution == "Ubuntu"
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+      when: ansible_distribution == "Ubuntu"
 
-  - name: install terraform
-    unarchive:
-      src: https://releases.hashicorp.com/terraform/{{terraform_version}}/terraform_{{terraform_version}}_linux_amd64.zip
-      dest: /usr/local/bin
-      remote_src: yes
-      mode: 0755
-      owner: root
-      group: docker
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu focal stable
+        state: present
+      when: ansible_distribution == "Ubuntu"
+
+    - name: update repo cache
+      apt:
+        update_cache: yes
+      changed_when: false
+
+    - name: install Docker on (Ubuntu)
+      package:
+        name:
+          - unzip
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+          - docker-compose
+        state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Install Docker Module for Python
+      pip:
+        name: docker
+      when: ansible_distribution == "Ubuntu"
+
+    - name: install terraform
+      unarchive:
+        src: https://releases.hashicorp.com/terraform/{{terraform_version}}/terraform_{{terraform_version}}_linux_amd64.zip
+        dest: /usr/local/bin
+        remote_src: yes
+        mode: 0755
+        owner: root
+        group: docker
+      when: ansible_distribution == "Ubuntu"
 
 - hosts: k8s
   become: true
   tasks:
 
-  - name: install required packages for Minikube on (Ubuntu)
+  - name: install Minikube and Helm on (Ubuntu)
     tags: minikube,helm
     package:
       name:
@@ -112,21 +136,13 @@
       state: latest
     when: ansible_distribution == "Ubuntu"
 
-  - name: Create a k8s namespace
-    k8s:
-      name: lab
-      api_version: v1
-      kind: Namespace
-      state: present
-    when: ansible_distribution == "Ubuntu"
-
 - hosts: file_servers
   become: true
   tasks:
-  - name: install required packages for Samba on (Ubuntu) file servers
+  - name: install Samba file server on (CentOS)
     tags: samba
     package:
       name:
         - samba
       state: latest
-    when: ansible_distribution == "Ubuntu"
+    when: ansible_distribution == "CentOS"
