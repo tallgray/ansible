@@ -5,7 +5,9 @@
   connection: local  
   vars:  
     - known_hosts: "~/.ssh/known_hosts"  
-  tasks:  
+
+  tasks: 
+
     - name: scan and register  
       command: "ssh-keyscan {{ansible_host|default(inventory_hostname)}}"  
       register: "host_keys"  
