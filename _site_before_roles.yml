@@ -3,14 +3,14 @@
   gather_facts: true
   become: true
   pre_tasks: 
-    - name: update repo cache (CentOS)
+    - name: update repo cache for (CentOS)
       tags: always
       yum:
         update_cache: true
       changed_when: false
       when: ansible_distribution == "CentOS"
 
-    - name: update repo cache (Ubuntu)
+    - name: update repo cache for (Ubuntu)
       tags: always
       apt:
         update_cache: true
@@ -39,7 +39,7 @@
         group: root
         mode: 0440
 
-    - name: install required system packages (Ubuntu)
+    - name: install required system packages for (Ubuntu)
       tags: nano,apt-transport-https,ca-certificates,curl,software-properties-common,python3,pip
       package:
         name:
@@ -51,10 +51,9 @@
           - python3-pip
           - python3-setuptools
         state: latest
-        update_cache: true
       when: ansible_distribution == "Ubuntu"
 
-    - name: install required system packages (CentOS)
+    - name: install required system packages for (CentOS)
       tags: nano,ca-certificates,curl,dnf,python3,pip
       package:
         name:
@@ -65,7 +64,6 @@
           - python3-pip
           - python3-setuptools
         state: latest
-        update_cache: true
       when: ansible_distribution == "CentOS"
 
 - hosts: master,workers,k8s
@@ -82,7 +80,7 @@
         repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
         state: present
 
-    - name: install Docker on (Ubuntu)
+    - name: install Docker
       package:
         name:
           - docker-ce
@@ -104,7 +102,7 @@
   gather_facts: false
   become: true
   tasks:
-    - name: install Minikube and Helm on (Ubuntu)
+    - name: install Minikube and Helm
       tags: minikube,helm
       package:
         name:
@@ -116,7 +114,7 @@
   gather_facts: false
   become: true
   tasks:
-  - name: install Samba file server on (CentOS)
+  - name: install Samba
     tags: samba
     package:
       name:
