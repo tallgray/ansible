@@ -1,17 +1,17 @@
 - name: Create ansible user
-  tags: always
+  tags: ansible_user
   user:
     name: ansible
     groups: root
 
 - name: Add ssh key for ansible
-  tags: always
+  tags: ansible_user
   authorized_key:
     user: ansible
     key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPN+wxbH4oMKt/lUQ5s+Hrcyw8KMwhZqiZgTph2nD7QX ansible"
 
 - name: Add sudoers file for ansible
-  tags: always
+  tags: ansible_user
   copy:
     src: sudoer_ansible
     dest: /etc/sudoers.d/ansible
@@ -20,7 +20,7 @@
     mode: 0440
 
 - name: Install required system packages for (Ubuntu)
-  tags: nano, apt-transport-https, ca-certificates, curl, software-properties-common, python3, pip
+  tags: system_packages
   package:
     name:
       - apt-transport-https
@@ -34,7 +34,7 @@
   when: ansible_distribution == "Ubuntu"
 
 - name: Install required system packages for (CentOS)
-  tags: nano, ca-certificates, curl, python3, pip
+  tags: system_packages
   package:
     name:
       - nano
