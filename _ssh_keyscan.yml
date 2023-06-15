@@ -7,16 +7,16 @@
     - known_hosts: "~/.ssh/known_hosts"  
 
   tasks: 
-    - name: scan and register  
-      command: "ssh-keyscan {{ansible_host|default(inventory_hostname)}}"  
+    - name: Scan and register new host key
+      command: "ssh-keyscan {{ ansible_host|default(inventory_hostname) }}"  
       register: "host_keys"  
       changed_when: false  
 
-    - file: path={{known_hosts}} state=touch  
+    - file: path={{ known_hosts }} state=touch  
       run_once: true  
 
     - blockinfile:  
-        dest: "{{known_hosts}}"  
+        dest: "{{ known_hosts }}"  
         marker: "# {mark} This part managed by Ansible"  
         block: |  
           {% for h in groups['all'] if hostvars[h].host_keys is defined %}  
