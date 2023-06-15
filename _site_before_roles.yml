@@ -1,0 +1,148 @@
+---
+- hosts: all
+  gather_facts: true
+  become: true
+  pre_tasks: 
+    - name: update repo cache (CentOS)
+      tags: always
+      yum:
+        update_cache: true
+      changed_when: false
+      when: ansible_distribution == "CentOS"
+
+    - name: update repo cache (Ubuntu)
+      tags: always
+      apt:
+        update_cache: true
+      changed_when: false
+      when: ansible_distribution == "Ubuntu"
+
+  tasks:
+    - name: create ansible user
+      tags: always
+      user:
+        name: ansible
+        groups: root
+
+    - name: add ssh key for ansible
+      tags: always
+      authorized_key:
+        user: ansible
+        key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPN+wxbH4oMKt/lUQ5s+Hrcyw8KMwhZqiZgTph2nD7QX ansible"
+
+    - name: add sudoers file for ansible
+      tags: always
+      copy:
+        src: sudoer_ansible
+        dest: /etc/sudoers.d/ansible
+        owner: root
+        group: root
+        mode: 0440
+
+    - name: install required system packages (Ubuntu)
+      tags: nano,apt-transport-https,ca-certificates,curl,software-properties-common,python3,pip
+      package:
+        name:
+          - apt-transport-https
+          - nano
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - python3-setuptools
+        state: latest
+        update_cache: true
+      when: ansible_distribution == "Ubuntu"
+
+    - name: install required system packages (CentOS)
+      tags: nano,ca-certificates,curl,dnf,python3,pip
+      package:
+        name:
+          - ca-certificates
+          - nano
+          - curl
+          - dnf
+          - python3-pip
+          - python3-setuptools
+        state: latest
+        update_cache: true
+      when: ansible_distribution == "CentOS"
+
+- hosts: master,workers,k8s
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+        state: present
+
+    - name: install Docker on (Ubuntu)
+      package:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+          - docker-compose
+        state: present
+        update_cache: true
+
+    - name: Install Docker Module for Python
+      become: false
+      pip:
+        name: docker
+        state: present
+
+- hosts: k8s
+  gather_facts: false
+  become: true
+  tasks:
+    - name: install Minikube and Helm on (Ubuntu)
+      tags: minikube,helm
+      package:
+        name:
+          - minikube
+          - helm
+        state: present
+
+- hosts: file_servers
+  gather_facts: false
+  become: true
+  tasks:
+  - name: install Samba file server on (CentOS)
+    tags: samba
+    package:
+      name:
+        - samba
+      state: latest
+
+- hosts: workstations
+  gather_facts: false
+  become: true
+  vars:
+    terraform_version: 1.5.0
+
+  tasks:
+    - name: install semaphore
+      snap:
+        name: semaphore
+
+    - name: install unzip
+      package:
+        name: unzip
+
+    - name: install terraform
+      unarchive:
+        src: https://releases.hashicorp.com/terraform/{{terraform_version}}/terraform_{{terraform_version}}_linux_amd64.zip
+        dest: /usr/local/bin
+        remote_src: yes
+        mode: 0755
+        owner: root
+        group: root
