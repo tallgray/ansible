@@ -1,9 +1,13 @@
 ---
 - name: Ping test on inventory
   hosts: all
-  gather_facts: false
-  become: true
+  gather_facts: true
+  become: false
   tasks:
 
     - name: Ping test
       ansible.builtin.ping:
+
+    - name: Show inventory hostname and gathered fact (IPv4 Address)
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
