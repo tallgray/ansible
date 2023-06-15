@@ -4,14 +4,14 @@
   pre_tasks: 
 
   - name: update repo cache (RedHat)
-    tags: always
+    tags: update_cache
     yum:
       update_cache: yes
     changed_when: false
     when: ansible_distribution == "RedHat"
 
   - name: update repo cache (Ubuntu)
-    tags: always
+    tags: update_cache
     apt:
       update_cache: yes
     changed_when: false
