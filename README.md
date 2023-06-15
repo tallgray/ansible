@@ -1,6 +1,6 @@
 ## Efficient Config Management with Ansible
 
-# End-to-end automation to configure hosts, containers, and deploy software. This project will be designed around a lab development environment consisting of six (6) virtual machine hosts: a workstation on Ubuntu desktop, a file server on CentOS, a Minikube install on Ubuntu, and three (3) Docker hosts on Ubuntu: a master and two workers. Initially, these applications will be deployed as containers: Grafana with Prometheus, Jenkins. 
+End-to-end automation to configure hosts, containers, and deploy software. This project will be designed around a lab development environment consisting of six (6) virtual machine hosts: a workstation on Ubuntu desktop, a file server on CentOS, a Minikube install on Ubuntu, and three (3) Docker hosts on Ubuntu: a master and two workers. Initially, these applications will be deployed as containers: Grafana with Prometheus, Jenkins. 
 
 # INVENTORY
 The virtual machine host inventory will be as follows: 
