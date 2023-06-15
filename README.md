@@ -1,8 +1,8 @@
-## Ansible
+## Efficient Config Management with Ansible
 
-#End-to-end automation to configure hosts, containers, and deploy software. This project will be designed around a lab development environment consisting of six (6) virtual machine hosts: a workstation on Ubuntu desktop, a file server on CentOS, a Minikube install on Ubuntu, and three (3) Docker hosts on Ubuntu: a master and two workers. Initially, these applications will be deployed as containers: Grafana with Prometheus, Jenkins. 
+# End-to-end automation to configure hosts, containers, and deploy software. This project will be designed around a lab development environment consisting of six (6) virtual machine hosts: a workstation on Ubuntu desktop, a file server on CentOS, a Minikube install on Ubuntu, and three (3) Docker hosts on Ubuntu: a master and two workers. Initially, these applications will be deployed as containers: Grafana with Prometheus, Jenkins. 
 
-#INVENTORY
+# INVENTORY
 The virtual machine host inventory will be as follows: 
 HOSTNAME|FUNCTION 
 ubuntu|workstation (will act as the sys admin node), 
@@ -14,7 +14,7 @@ docker2|worker
 
 The packages installed on each node are contained within the ansible playbooks.
 
-#USER GUIDE:
+# USER GUIDE
 Create ssh key pair for your username and define a custom file name
   ssh-keygen -t ed25519 -C "<USERNAME1>" -f id_<USERNAME1>
 
