@@ -3,35 +3,37 @@
   gather_facts: true
   become: true
   pre_tasks: 
+
     - name: update repo cache for (CentOS)
-      tags: always
+      tags: update_cache
       yum:
         update_cache: true
       changed_when: false
       when: ansible_distribution == "CentOS"
 
     - name: update repo cache for (Ubuntu)
-      tags: always
+      tags: update_cache
       apt:
         update_cache: true
       changed_when: false
       when: ansible_distribution == "Ubuntu"
 
   tasks:
+
     - name: create ansible user
-      tags: always
+      tags: ansible_user
       user:
         name: ansible
         groups: root
 
     - name: add ssh key for ansible
-      tags: always
+      tags: ansible_user
       authorized_key:
         user: ansible
         key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPN+wxbH4oMKt/lUQ5s+Hrcyw8KMwhZqiZgTph2nD7QX ansible"
 
     - name: add sudoers file for ansible
-      tags: always
+      tags: ansible_user
       copy:
         src: sudoer_ansible
         dest: /etc/sudoers.d/ansible
@@ -40,7 +42,7 @@
         mode: 0440
 
     - name: install required system packages for (Ubuntu)
-      tags: nano,apt-transport-https,ca-certificates,curl,software-properties-common,python3,pip
+      tags: system_packages
       package:
         name:
           - apt-transport-https
@@ -54,7 +56,7 @@
       when: ansible_distribution == "Ubuntu"
 
     - name: install required system packages for (CentOS)
-      tags: nano,ca-certificates,curl,dnf,python3,pip
+      tags: system_packages
       package:
         name:
           - ca-certificates
@@ -70,17 +72,21 @@
   gather_facts: false
   become: true
   tasks:
+
     - name: Add Docker GPG apt Key
+      tags: docker
       apt_key:
         url: https://download.docker.com/linux/ubuntu/gpg
         state: present
 
     - name: Add Docker Repository
+      tags: docker
       apt_repository:
         repo: deb https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
         state: present
 
     - name: install Docker
+      tags: docker
       package:
         name:
           - docker-ce
@@ -93,7 +99,7 @@
         update_cache: true
 
     - name: Install Docker Module for Python
-      become: false
+      tags: docker
       pip:
         name: docker
         state: present
@@ -102,6 +108,7 @@
   gather_facts: false
   become: true
   tasks:
+
     - name: install Minikube and Helm
       tags: minikube,helm
       package:
@@ -114,6 +121,7 @@
   gather_facts: false
   become: true
   tasks:
+
   - name: install Samba
     tags: samba
     package:
@@ -128,6 +136,7 @@
     terraform_version: 1.5.0
 
   tasks:
+
     - name: install semaphore
       snap:
         name: semaphore
