@@ -1,0 +1,9 @@
+---
+- name: Ping test on inventory
+  hosts: all
+  gather_facts: false
+  become: true
+  tasks:
+
+    - name: Ping test
+      ansible.builtin.ping:
