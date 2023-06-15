@@ -1,5 +1,4 @@
 [workstations]
-ansible
 ubuntu
 
 [file_servers]
