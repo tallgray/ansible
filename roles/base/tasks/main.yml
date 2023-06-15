@@ -1,16 +1,16 @@
-- name: create ansible user
+- name: Create ansible user
   tags: always
   user:
     name: ansible
     groups: root
 
-- name: add ssh key for ansible
+- name: Add ssh key for ansible
   tags: always
   authorized_key:
     user: ansible
     key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPN+wxbH4oMKt/lUQ5s+Hrcyw8KMwhZqiZgTph2nD7QX ansible"
 
-- name: add sudoers file for ansible
+- name: Add sudoers file for ansible
   tags: always
   copy:
     src: sudoer_ansible
@@ -19,7 +19,7 @@
     group: root
     mode: 0440
 
-- name: install required system packages (Ubuntu)
+- name: Install required system packages for (Ubuntu)
   tags: nano, apt-transport-https, ca-certificates, curl, software-properties-common, python3, pip
   package:
     name:
@@ -31,10 +31,9 @@
       - python3-pip
       - python3-setuptools
     state: latest
-    update_cache: true
   when: ansible_distribution == "Ubuntu"
 
-- name: install required system packages (CentOS)
+- name: Install required system packages for (CentOS)
   tags: nano, ca-certificates, curl, python3, pip
   package:
     name:
@@ -45,5 +44,4 @@
       - python3-pip
       - python3-setuptools
     state: latest
-    update_cache: true
   when: ansible_distribution == "CentOS"

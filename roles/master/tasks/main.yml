@@ -5,15 +5,10 @@
 
 - name: Add Docker Repository
   apt_repository:
-    repo: deb https://download.docker.com/linux/ubuntu {{distribution_release}} stable
+    repo: deb https://download.docker.com/linux/ubuntu {{ distribution_release }} stable
     state: present
 
-- name: update repo cache
-  apt:
-    update_cache: yes
-  changed_when: false
-
-- name: install Docker on (Ubuntu)
+- name: Install Docker
   package:
     name:
       - docker-ce
@@ -23,6 +18,7 @@
       - docker-compose-plugin
       - docker-compose
     state: latest
+    update_cache: true
 
 - name: Install Docker Module for Python
   pip:

@@ -1,4 +1,4 @@
-- name: install samba
+- name: Install samba
   tags: samba
   package:
     name:
