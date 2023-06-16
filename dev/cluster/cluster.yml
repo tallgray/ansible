@@ -1,0 +1,17 @@
+---
+- name: Provision Kubernetes cluster
+  hosts: all
+  become: true
+  gather_facts: true
+  vars_files:
+    - user_vars/windows.yml
+    - user_vars/master.yml
+    - user_vars/worker.yml
+    - user_vars/ingress.yml
+  roles:
+    - role: master
+      tags: master
+    - role: worker
+      tags: worker
+    - role: ingress
+      tags: ingress

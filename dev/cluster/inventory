@@ -1,0 +1,11 @@
+
+docker
+docker1
+docker2
+
+[kubernetes:children]
+master
+worker
+
+[ingress]
+docker

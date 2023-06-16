@@ -1,0 +1,16 @@
+---
+- name: Install Docker and Kubernetes components on worker nodes
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - docker.io
+    - kubeadm
+    - kubelet
+    - kubectl
+  tags: worker
+
+- name: Join worker nodes to the Kubernetes cluster
+  command: "{{ hostvars['docker'].kubeadm_init_output.stdout_lines[-1] }}"
+  when: "'kubeadm_init_output' in hostvars['docker']"
+  tags: worker

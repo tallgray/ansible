@@ -1,0 +1,28 @@
+---
+- name: Install NGINX Ingress Controller
+  command: kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.0.0/deploy/static/provider/cloud/deploy.yaml
+  tags: ingress
+
+- name: Configure DNS records on Windows DNS server
+  win_dns_record:
+    name: "{{ item.name }}"
+    zone: "{{ item.zone }}"
+    type: A
+    value: "{{ item.ipv4 }}"
+  loop:
+    - { name: "my-service", zone: "gdom.local", ipv4: "192.168.0.140" }
+    - { name: "my-service2", zone: "gdom.local", ipv4: "192.168.0.141" }
+  delegate_to: localhost
+  tags: ingress
+
+- name: Configure PTR records on Windows DNS server
+  win_dns_record:
+    name: "{{ item.name }}"
+    zone: "{{ item.zone }}"
+    type: PTR
+    value: "{{ item.ipv4 }}"
+  loop:
+    - { name: "{{ (ipv4.split('.'))[::-1]|join('.') }}", zone: "gdom.local", ipv4: "192.168.0.140" }
+    - { name: "{{ (ipv4.split('.'))[::-1]|join('.') }}", zone: "gdom.local", ipv4: "192.168.0.141" }
+  delegate_to: localhost
+  tags: ingress

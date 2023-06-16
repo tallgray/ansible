@@ -1,0 +1,14 @@
+- playbook.yml
+- inventory.ini
+- roles/
+  - master/
+    - tasks/
+      - main.yml
+    - templates/
+      - kube-config.j2
+  - worker/
+    - tasks/
+      - main.yml
+  - ingress/
+    - tasks/
+      - main.yml
