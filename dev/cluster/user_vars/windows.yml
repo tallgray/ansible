@@ -1,5 +1,0 @@
-ansible_user: ansible@gdom.local
-ansible_password: "@nsib1E"
-ansible_connection: winrm
-ansible_winrm_transport: credssp
-ansible_winrm_server_cert_validation: ignore
