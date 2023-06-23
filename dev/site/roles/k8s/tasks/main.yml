@@ -35,3 +35,17 @@
       - minikube
       - helm
     state: latest
+
+- name: Create a Minikube network with driver options and custom IPAM config
+  docker_network:
+    name: mnet
+    driver: ipvlan
+    driver_options:
+      parent: "{{ ansible_default_ipv4.interface }}"
+    ipam_config:
+      - subnet: 192.168.0.0/24
+        gateway: 192.168.0.254
+        iprange: 192.168.0.192/26
+        aux_addresses:
+          host1: 192.168.0.192
+          host1: 192.168.0.253
