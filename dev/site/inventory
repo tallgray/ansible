@@ -1,5 +1,5 @@
 [workstations]
-ubuntu      inventory_ip=192.168.0.12   inventory_zone=gdom.local   ansible_host=192.168.0.76
+ubuntu      inventory_ip=192.168.0.12   inventory_zone=gdom.local   ansible_host=192.168.0.12
 
 [file_servers]
 samba1      inventory_ip=192.168.0.13   inventory_zone=gdom.local   ansible_host=192.168.0.13
@@ -8,8 +8,8 @@ samba1      inventory_ip=192.168.0.13   inventory_zone=gdom.local   ansible_host
 docker      inventory_ip=192.168.0.128  inventory_zone=gdom.local   ansible_host=192.168.0.128
 
 [workers]
-docker1     inventory_ip=192.168.0.129  inventory_zone=gdom.local   ansible_host=192.168.0.69
-docker2     inventory_ip=192.168.0.130  inventory_zone=gdom.local   ansible_host=192.168.0.68
+docker1     inventory_ip=192.168.0.129  inventory_zone=gdom.local   ansible_host=192.168.0.129
+docker2     inventory_ip=192.168.0.130  inventory_zone=gdom.local   ansible_host=192.168.0.130
 
 [k8s]
 minik       inventory_ip=192.168.0.192  inventory_zone=gdom.local   ansible_host=192.168.0.192
