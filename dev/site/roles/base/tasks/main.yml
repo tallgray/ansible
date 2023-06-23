@@ -47,6 +47,7 @@
   when: ansible_distribution == "CentOS"
 
 - name: Copy the netplan template 00-installer-config.yaml over
+  tags: ipam
   template:
     src: 00-installer-config.yaml.ubuntu.j2
     dest: /etc/netplan/00-installer-config.yaml
@@ -57,12 +58,14 @@
   when: ansible_distribution == "Ubuntu"
 
 - name: Apply and reload the new static ip address with netplan
+  tags: ipam
   command: netplan apply
   async: 100
   poll: 0
   when: ansible_distribution == "Ubuntu"
 
 - name: Apply new static IP configuration with nmcli
+  tags: ipam
   community.general.nmcli:
     conn_name: eth0
     ifname: eth0
@@ -76,5 +79,6 @@
   when: ansible_distribution == "CentOS"
 
 - name: Update Ansible with new ip address information
+  tags: ipam
   set_fact:
     ansible_host: "{{inventory_ip}}"
