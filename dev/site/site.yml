@@ -1,9 +1,9 @@
 ---
 - hosts: all
-  become: true
   pre_tasks: 
 
   - name: update repo cache (RedHat)
+    become: true
     tags: update_cache
     yum:
       update_cache: yes
@@ -11,6 +11,7 @@
     when: ansible_distribution == "RedHat"
 
   - name: update repo cache (Ubuntu)
+    become: true
     tags: update_cache
     apt:
       update_cache: yes
