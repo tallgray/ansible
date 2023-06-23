@@ -52,3 +52,9 @@
   become: true
   roles:
     - workstations
+
+- hosts: all
+  gather_facts: false
+  become: false
+  roles:
+    - dns
