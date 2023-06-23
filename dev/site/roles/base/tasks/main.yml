@@ -8,7 +8,7 @@
   tags: ansible_user
   authorized_key:
     user: ansible
-    key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPN+wxbH4oMKt/lUQ5s+Hrcyw8KMwhZqiZgTph2nD7QX ansible"
+    key: "{{ public_key }}"
 
 - name: Add sudoers file for ansible
   tags: ansible_user
@@ -45,3 +45,36 @@
       - python3-setuptools
     state: latest
   when: ansible_distribution == "CentOS"
+
+- name: Copy the netplan template 00-installer-config.yaml over
+  template:
+    src: 00-installer-config.yaml.ubuntu.j2
+    dest: /etc/netplan/00-installer-config.yaml
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: Apply and reload the new static ip address with netplan
+  command: netplan apply
+  async: 100
+  poll: 0
+  when: ansible_distribution == "Ubuntu"
+
+- name: Apply new static IP configuration with nmcli
+  community.general.nmcli:
+    conn_name: eth0
+    ifname: eth0
+    type: ethernet
+    ip4: "{{ inventory_ip }}/24"
+    gw4: 192.168.0.254
+    dns4: 192.168.0.6
+    dns4_search: "{{ inventory_zone }}"
+    autoconnect: yes
+    state: present
+  when: ansible_distribution == "CentOS"
+
+- name: Update Ansible with new ip address information
+  set_fact:
+    ansible_host: "{{inventory_ip}}"
