@@ -78,18 +78,15 @@
     state: present
   when: ansible_distribution == "CentOS"
 
+- name: Update inventory file with new ip address information
+  tags: ipam
+  delegate_to: localhost
+  replace:
+    path: inventory
+    regexp: "(\s+){{ ansible_host }}(\s+.*)?$"
+    replace: "\1{{ inventory_ip }}\2"
+
 - name: Update ansible_host fact with new ip address information
   tags: ipam
   set_fact:
     ansible_host: "{{ inventory_ip }}"
-
-- name: Update inventory file with new ip address information
-  tags: ipam
-  delegate_to: localhost
-  ini_file:
-    dest: inventory
-    option: "ansible_host"
-    value: "{{ inventory_ip }}"
-    no_extra_spaces: yes
-    state: present
-    backup: yes
