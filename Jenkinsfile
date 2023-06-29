@@ -1,7 +1,7 @@
 pipeline {
   agent any
   stages {
-    stage('Build Image') {
+    stage('Checkout Code') {
       steps {
         git(url: 'https://github.com/tallgray/ansible', branch: 'main')
       }
