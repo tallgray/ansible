@@ -11,6 +11,9 @@ docker      inventory_ip=192.168.0.128  inventory_zone=gdom.local   ansible_host
 docker1     inventory_ip=192.168.0.129  inventory_zone=gdom.local   ansible_host=192.168.0.129
 docker2     inventory_ip=192.168.0.130  inventory_zone=gdom.local   ansible_host=192.168.0.130
 
+[pipeline]
+jenkins     inventory_ip=192.168.0.14   inventory_zone=gdom.local   ansible_host=192.168.0.14
+
 [k8s]
 minik       inventory_ip=192.168.0.192  inventory_zone=gdom.local   ansible_host=192.168.0.192
 
@@ -18,3 +21,4 @@ minik       inventory_ip=192.168.0.192  inventory_zone=gdom.local   ansible_host
 ue1-win006  inventory_ip=192.168.0.6    inventory_zone=gdom.local   ansible_host=192.168.0.6
 
 [aws]
+

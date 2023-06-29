@@ -1,16 +1,21 @@
 - name: Create ansible user
+  run_once: yes
   tags: ansible_user
   user:
     name: ansible
     groups: root
+  when: ansible_system != "Win32NT"
 
-- name: Add ssh key for ansible
+- name: Add public SSH key for ansible
+  run_once: yes
   tags: ansible_user
   authorized_key:
     user: ansible
-    key: "{{ public_key }}"
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ansible.pub') }}"
+  when: ansible_system != "Win32NT"
 
 - name: Add sudoers file for ansible
+  run_once: yes
   tags: ansible_user
   copy:
     src: sudoer_ansible
@@ -18,6 +23,7 @@
     owner: root
     group: root
     mode: 0440
+  when: ansible_system != "Win32NT"
 
 - name: Install required system packages for (Ubuntu)
   tags: system_packages
@@ -78,13 +84,13 @@
     state: present
   when: ansible_distribution == "CentOS"
 
-- name: Update inventory file with new ip address information
-  tags: ipam
-  delegate_to: localhost
-  replace:
-    path: inventory
-    regexp: "(\s+){{ ansible_host }}(\s+.*)?$"
-    replace: "\1{{ inventory_ip }}\2"
+# - name: Update inventory file with new ip address information
+#   tags: ipam
+#   delegate_to: localhost
+#   replace:
+#     path: inventory
+#     regexp: '(\s+){{ ansible_host }}(\s+.*)?$'
+#     replace: '\1{{ inventory_ip }}\2'
 
 - name: Update ansible_host fact with new ip address information
   tags: ipam

@@ -20,6 +20,12 @@
 
 - hosts: all
   gather_facts: false
+  become: false
+  roles:
+    - dns
+
+- hosts: all
+  gather_facts: false
   become: true
   roles:
     - base
@@ -54,8 +60,8 @@
   roles:
     - workstations
 
-- hosts: all
+- hosts: pipeline
   gather_facts: false
-  become: false
+  become: true
   roles:
-    - dns
+    - pipeline

@@ -1,1 +1,25 @@
+
 distribution_release: "{{ ansible_distribution_release }}"
+
+file_pfx: node-terraform
+remote_user: tallgray1
+img_name: terraform-ssh
+img_tag: 1
+ctnr_name: node-terraform
+ctnr_network: mnet
+ctnr_ip: 192.168.0.195
+ctnr_expose: 22
+ctnr_ports: "22:22"
+ctnr_vol1: /home/{{ remote_user }}/.aws:/home/{{ remote_user }}/.aws
+ctnr_vol2: /home/{{ remote_user }}/.ssh:/home/{{ remote_user }}/.ssh
+
+# img_name: cgr.dev/chainguard/jenkins
+# img_tag: 1
+# ctnr_name: node-jenkins
+# ctnr_network: mnet
+# ctnr_ip: 192.168.0.224
+# ctnr_expose: 8088
+# ctnr_ports1: "8088:8080"
+# ctnr_ports2: "8088:8080"
+# ctnr_vol1: ./jenkins-backup:/backup-dir
+# ctnr_vol2: jenkins_home:/var/jenkins_home
