@@ -7,5 +7,11 @@ pipeline {
       }
     }
 
+    stage('Ping Inventory') {
+      steps {
+        sh 'ansible-playbook _ping.yml '
+      }
+    }
+
   }
 }
