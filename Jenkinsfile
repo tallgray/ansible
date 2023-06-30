@@ -16,6 +16,7 @@ pipeline {
       }
       steps {
         sh 'ansible-playbook _ping.yml '
+        ansiblePlaybook(playbook: '_ping.yml', inventory: 'inventory')
       }
     }
 
