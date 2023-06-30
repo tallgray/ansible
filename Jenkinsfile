@@ -8,6 +8,12 @@ pipeline {
     }
 
     stage('Ping Inventory') {
+      agent {
+        node {
+          label 'ubuntu-ansible-jenkins-agent'
+        }
+
+      }
       steps {
         sh 'ansible-playbook _ping.yml '
       }
