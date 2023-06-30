@@ -1,0 +1,17 @@
+- name: Create type A record
+  tags: dns
+  community.windows.win_dns_record:
+    name: "{{ inventory_hostname }}"
+    type: "A"
+    value: "{{ inventory_ip }}"
+    zone: "{{ inventory_zone }}"
+  delegate_to: ue1-win006
+
+- name: Create type PTR record
+  tags: dns
+  community.windows.win_dns_record:
+    name: "{{ inventory_ip.split('.')[-1] | join() }}"
+    type: "PTR"
+    value: "{{ inventory_hostname }}.{{ inventory_zone }}"
+    zone: "{{ inventory_ip.split('.')[:-1][::-1]|join('.') }}.in-addr.arpa"
+  delegate_to: ue1-win006

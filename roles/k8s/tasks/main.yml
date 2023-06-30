@@ -1,0 +1,113 @@
+- name: Add Docker GPG apt Key
+  tags: docker
+  apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker Repository
+  tags: docker
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu {{ distribution_release }} stable
+    state: present
+
+- name: Install Docker
+  tags: docker
+  package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+      - docker-compose
+    state: latest
+    update_cache: true
+
+- name: Install Docker Module for Python
+  tags: docker
+  pip:
+    name: docker
+
+- name: Install Minikube and Helm
+  tags: minikube,helm
+  package:
+    name:
+      - minikube
+      - helm
+    state: latest
+
+- name: Create a Minikube network with driver options and custom IPAM config
+  tags: ipvlan
+  docker_network:
+    name: mnet
+    driver: ipvlan
+    driver_options:
+      parent: "{{ ansible_default_ipv4.interface }}"
+    ipam_config:
+      - subnet: 192.168.0.0/24
+        gateway: 192.168.0.254
+        iprange: 192.168.0.192/26
+        aux_addresses:
+          host1: 192.168.0.192
+          host2: 192.168.0.253
+
+- name: Copy Dockerfile to target host
+  tags: image
+  copy: src={{ file_pfx }}.Dockerfile dest=./Dockerfile mode='0700'
+
+- name: Copy public key to target host
+  tags: image
+  copy: src=~/.ssh/id_{{ remote_user }}.pub dest=./key.pub mode='0700'
+
+- name: Copy entry script
+  tags: image
+  copy: src=entry_script.sh dest=./entry_script.sh mode='0700'
+
+- name: Build image and add tag
+  tags: image
+  community.docker.docker_image:
+    name: "{{ img_name }}:{{ img_tag }}"
+    build:
+      pull: yes
+      path: ./
+    state: present
+    source: build
+
+# - name: Start container, connect to network
+#   tags: container
+#   community.docker.docker_container:
+#     name: "{{ ctnr_name }}"
+#     image: "{{ img_name }}"
+#     state: started
+#     detach: yes
+#     tty: yes
+#     expose: "{{ ctnr_expose }}"
+#     ports:
+#       - "0.0.0.0:{{ ctnr_ports1 }}"
+#       - "{{ ctnr_ports2 }}"
+#     networks:
+#       - name: "{{ ctnr_network }}"
+#         ipv4_address: "{{ ctnr_ip }}"
+#     volumes:
+#       - "{{ ctnr_vol1 }}"
+#       - "{{ ctnr_vol2 }}"
+#     command: cp -r /var/jenkins_home /backup-dir/
+
+- name: Start container, connect to network
+  tags: container
+  community.docker.docker_container:
+    name: "{{ ctnr_name }}"
+    image: "{{ img_name }}:{{ img_tag }}"
+    state: started
+    detach: yes
+    tty: yes
+    expose: "{{ ctnr_expose }}"
+    ports:
+      - "0.0.0.0:{{ ctnr_ports }}"
+    networks:
+      - name: "{{ ctnr_network }}"
+        ipv4_address: "{{ ctnr_ip }}"
+    volumes:
+      - "{{ ctnr_vol1 }}"
+      - "{{ ctnr_vol2 }}"
+    command: /bin/bash

@@ -1,0 +1,28 @@
+- name: Install git
+  snap:
+    name: git
+    state: latest
+
+- name: Install ansible
+  snap:
+    name: ansible
+    state: latest
+
+- name: Install semaphore
+  snap:
+    name: semaphore
+    state: latest
+
+- name: Install unzip
+  package:
+    name: unzip
+    state: latest
+
+- name: Install terraform
+  unarchive:
+    src: https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: 0755
+    owner: root
+    group: root

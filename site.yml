@@ -1,0 +1,67 @@
+---
+- hosts: all
+  pre_tasks: 
+
+  - name: update repo cache (RedHat)
+    become: true
+    tags: update_cache
+    yum:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution == "RedHat"
+
+  - name: update repo cache (Ubuntu)
+    become: true
+    tags: update_cache
+    apt:
+      update_cache: yes
+    changed_when: false
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: all
+  gather_facts: false
+  become: false
+  roles:
+    - dns
+
+- hosts: all
+  gather_facts: false
+  become: true
+  roles:
+    - base
+
+- hosts: file_servers
+  gather_facts: false
+  become: true
+  roles:
+    - file_servers
+
+- hosts: k8s
+  gather_facts: false
+  become: true
+  roles:
+    - k8s
+
+- hosts: master
+  gather_facts: false
+  become: true
+  roles:
+    - master
+
+- hosts: workers
+  gather_facts: false
+  become: true
+  roles:
+    - workers
+
+- hosts: workstations
+  gather_facts: false
+  become: true
+  roles:
+    - workstations
+
+- hosts: pipeline
+  gather_facts: false
+  become: true
+  roles:
+    - pipeline

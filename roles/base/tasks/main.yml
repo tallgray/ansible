@@ -1,0 +1,98 @@
+- name: Create ansible user
+  run_once: yes
+  tags: ansible_user
+  user:
+    name: ansible
+    groups: root
+  when: ansible_system != "Win32NT"
+
+- name: Add public SSH key for ansible
+  run_once: yes
+  tags: ansible_user
+  authorized_key:
+    user: ansible
+    key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_ansible.pub') }}"
+  when: ansible_system != "Win32NT"
+
+- name: Add sudoers file for ansible
+  run_once: yes
+  tags: ansible_user
+  copy:
+    src: sudoer_ansible
+    dest: /etc/sudoers.d/ansible
+    owner: root
+    group: root
+    mode: 0440
+  when: ansible_system != "Win32NT"
+
+- name: Install required system packages for (Ubuntu)
+  tags: system_packages
+  package:
+    name:
+      - apt-transport-https
+      - nano
+      - ca-certificates
+      - curl
+      - software-properties-common
+      - python3-pip
+      - python3-setuptools
+    state: latest
+  when: ansible_distribution == "Ubuntu"
+
+- name: Install required system packages for (CentOS)
+  tags: system_packages
+  package:
+    name:
+      - nano
+      - ca-certificates
+      - curl
+      - dnf
+      - python3-pip
+      - python3-setuptools
+    state: latest
+  when: ansible_distribution == "CentOS"
+
+- name: Copy the netplan template 00-installer-config.yaml over
+  tags: ipam
+  template:
+    src: 00-installer-config.yaml.ubuntu.j2
+    dest: /etc/netplan/00-installer-config.yaml
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+  when: ansible_distribution == "Ubuntu"
+
+- name: Apply and reload the new static ip address with netplan
+  tags: ipam
+  command: netplan apply
+  async: 100
+  poll: 0
+  when: ansible_distribution == "Ubuntu"
+
+- name: Apply new static IP configuration with nmcli
+  tags: ipam
+  community.general.nmcli:
+    conn_name: eth0
+    ifname: eth0
+    type: ethernet
+    ip4: "{{ inventory_ip }}/24"
+    gw4: 192.168.0.254
+    dns4: 192.168.0.6
+    dns4_search: "{{ inventory_zone }}"
+    autoconnect: yes
+    state: present
+  when: ansible_distribution == "CentOS"
+
+# - name: Update inventory file with new ip address information
+#   tags: ipam
+#   delegate_to: localhost
+#   replace:
+#     path: inventory
+#     regexp: '(\s+){{ ansible_host }}(\s+.*)?$'
+#     replace: '\1{{ inventory_ip }}\2'
+
+- name: Update ansible_host fact with new ip address information
+  tags: ipam
+  set_fact:
+    ansible_host: "{{ inventory_ip }}"
