@@ -1,0 +1,20 @@
+---
+- name: Ping test on inventory
+  hosts: all
+  gather_facts: true
+  become: false
+  tasks:
+
+    - name: Ping test
+      ansible.builtin.ping:
+      when: ansible_system != "Win32NT"
+
+    - name: Show inventory hostname and gathered fact (IPv4 Address) for Linux
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+      when: ansible_system == "Linux"
+
+    - name: Show inventory hostname and gathered fact (IPv4 Address) for Windows
+      debug:
+        msg: "{{ hostvars[inventory_hostname]['ansible_ip_addresses'] }}"
+      when: ansible_system == "Win32NT"
