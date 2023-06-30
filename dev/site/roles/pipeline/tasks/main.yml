@@ -41,6 +41,11 @@
     key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_jenkins.pub') }}"
   delegate_to: "{{ docker_host }}"
 
+- name: Install JRE on Ubuntu host
+  package:
+    name: default-jre
+  delegate_to: "{{ ansible_controller }}"
+
 - name: Install git
   package:
     name:
