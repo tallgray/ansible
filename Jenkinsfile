@@ -15,7 +15,7 @@ pipeline {
 
       }
       steps {
-        sh 'ansible-playbook _ping.yml '
+        sh 'ansible-playbook /dev/site/_ping.yml '
       }
     }
 
