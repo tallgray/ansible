@@ -1,5 +1,5 @@
 pipeline {
-  agent agent-perm-ubuntu-ansible
+  agent any
   stages {
     stage('Checkout Code') {
       steps {
