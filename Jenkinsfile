@@ -10,7 +10,7 @@ pipeline {
     stage('Ping Inventory') {
       agent {
         node {
-          label 'ubuntu-ansible-jenkins-agent'
+          label 'agent-perm-ubuntu-ansible'
         }
 
       }
