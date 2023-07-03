@@ -11,7 +11,7 @@ pipeline {
     stage('Ansible Ping Inventory') {
       agent any
       steps {
-        ansiblePlaybook(credentialsId: 'agent-perm-ubuntu-ansible-sshkey', installation: 'Ansible Controller', inventory: '/home/ansible/ansible/inventory', playbook: '/home/ansible/ansible/_ping.yml')
+        ansiblePlaybook(credentialsId: 'agent-perm-ubuntu-ansible-sshkey', installation: 'Ansible Controller', inventory: 'inventory', playbook: '_ping.yml')
       }
     }
 
