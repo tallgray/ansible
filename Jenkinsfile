@@ -1,5 +1,5 @@
 pipeline {
-  agent any
+  agent agent-perm-ubuntu-ansible
   stages {
     stage('Checkout Code') {
       steps {
@@ -7,7 +7,7 @@ pipeline {
       }
     }
 
-    stage('Ping Inventory') {
+    stage('Ansible Ping Inventory') {
       agent {
         node {
           label 'agent-perm-ubuntu-ansible'
@@ -15,8 +15,7 @@ pipeline {
 
       }
       steps {
-        sh 'ansible-playbook _ping.yml '
-        ansiblePlaybook(playbook: '_ping.yml', inventory: 'inventory')
+        ansiblePlaybook credentialsId: 'agent-perm-ubuntu-ansible-sshkey', installation: 'Ansible Controller', inventory: '/home/ansible/ansible/inventory', playbook: '/home/ansible/ansible/_ping.yml'
       }
     }
 
