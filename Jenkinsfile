@@ -2,6 +2,7 @@ pipeline {
   agent any
   stages {
     stage('Checkout Code') {
+      agent any
       steps {
         git(url: 'https://github.com/tallgray/ansible', branch: 'main')
       }
@@ -15,7 +16,7 @@ pipeline {
 
       }
       steps {
-        ansiblePlaybook credentialsId: 'agent-perm-ubuntu-ansible-sshkey', installation: 'Ansible Controller', inventory: '/home/ansible/ansible/inventory', playbook: '/home/ansible/ansible/_ping.yml'
+        ansiblePlaybook(credentialsId: 'agent-perm-ubuntu-ansible-sshkey', installation: 'Ansible Controller', inventory: '/home/ansible/ansible/inventory', playbook: '/home/ansible/ansible/_ping.yml')
       }
     }
 
