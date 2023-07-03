@@ -1,6 +1,6 @@
 ---
 - name: Ping test on inventory
-  hosts: all
+  hosts: all:!containers
   gather_facts: true
   become: false
   tasks:
