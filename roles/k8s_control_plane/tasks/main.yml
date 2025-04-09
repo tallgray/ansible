@@ -1,0 +1,86 @@
+---
+- name: Install Kubernetes prerequisites
+  apt:
+    name:
+      - qemu-guest-agent
+      - nano
+      - containerd
+      - conntrack
+      - iptables
+      - socat
+      - ebtables
+    state: present
+    update_cache: yes
+
+- name: Enable and start qemu-guest-agent
+  systemd:
+    name: qemu-guest-agent
+    enabled: yes
+    state: started
+
+- name: Generate containerd default config
+  shell: "containerd config default"
+  register: containerd_default
+
+- name: Create containerd config directory
+  file:
+    path: /etc/containerd
+    state: directory
+
+- name: Save modified containerd config
+  copy:
+    content: "{{ containerd_default.stdout | regex_replace('SystemdCgroup = false', 'SystemdCgroup = true') }}"
+    dest: /etc/containerd/config.toml
+
+- name: Load kernel modules
+  template:
+    src: modules-load.conf.j2
+    dest: /etc/modules-load.d/k8s.conf
+
+- name: Apply sysctl settings
+  template:
+    src: sysctl.conf.j2
+    dest: /etc/sysctl.conf
+
+- name: Reload sysctl
+  command: sysctl -p
+
+- name: Add Kubernetes APT key and repo
+  shell: |
+    mkdir -p /etc/apt/keyrings
+    curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | \
+      gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /" > /etc/apt/sources.list.d/kubernetes.list
+
+- name: Install Kubernetes components
+  apt:
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
+    state: present
+    update_cache: true
+
+- name: Initialize Kubernetes control plane
+  command: kubeadm init --pod-network-cidr=10.244.0.0/16
+  register: kubeadm_init
+
+- name: Save join command
+  shell: |
+    kubeadm token create --print-join-command > /home/{{ ansible_user }}/join.sh
+  args:
+    creates: /home/{{ ansible_user }}/join.sh
+  become: yes
+
+- name: Set kubeconfig for regular user
+  become: yes
+  shell: |
+    mkdir -p /home/{{ ansible_user }}/.kube
+    cp -i /etc/kubernetes/admin.conf /home/{{ ansible_user }}/.kube/config
+    chown {{ ansible_user }}:{{ ansible_user }} /home/{{ ansible_user }}/.kube/config
+
+- name: Deploy Flannel CNI
+  become: yes
+  command: kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+  environment:
+    KUBECONFIG: "/etc/kubernetes/admin.conf"

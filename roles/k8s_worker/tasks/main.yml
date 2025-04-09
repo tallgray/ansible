@@ -1,0 +1,102 @@
+---
+- name: Install base packages
+  apt:
+    name:
+      - qemu-guest-agent
+      - nano
+    state: present
+    update_cache: true
+
+- name: Enable qemu-guest-agent
+  systemd:
+    name: qemu-guest-agent
+    enabled: yes
+    state: started
+
+- name: Upgrade all packages
+  apt:
+    upgrade: dist
+    update_cache: true
+
+- name: Install Kubernetes dependencies
+  apt:
+    name:
+      - containerd
+      - conntrack
+      - iptables
+      - socat
+      - ebtables
+    state: present
+
+- name: Create containerd config directory
+  file:
+    path: /etc/containerd
+    state: directory
+
+- name: Generate default containerd config
+  command: "containerd config default"
+  register: containerd_default
+
+- name: Save modified containerd config
+  copy:
+    content: "{{ containerd_default.stdout | regex_replace('SystemdCgroup = false', 'SystemdCgroup = true') }}"
+    dest: /etc/containerd/config.toml
+
+- name: Load kernel modules for k8s
+  template:
+    src: modules-load.conf.j2
+    dest: /etc/modules-load.d/k8s.conf
+
+- name: Apply sysctl config for IP forwarding
+  template:
+    src: sysctl.conf.j2
+    dest: /etc/sysctl.conf
+
+- name: Reload sysctl
+  command: sysctl -p
+
+- name: Reboot to apply changes
+  reboot:
+    reboot_timeout: 300
+
+- name: Ensure apt keyring directory exists
+  file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+
+- name: Download and install Kubernetes APT keyring
+  shell: |
+    curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+  args:
+    creates: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+- name: Add Kubernetes APT source list
+  copy:
+    dest: /etc/apt/sources.list.d/kubernetes.list
+    content: |
+      deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /
+
+- name: Ensure permissions on keyring file are correct
+  file:
+    path: /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+    mode: '0644'
+
+- name: Force APT to update with new repo
+  apt:
+    update_cache: true
+    cache_valid_time: 0
+
+- name: Install kubeadm, kubelet, kubectl
+  apt:
+    name:
+      - kubeadm
+      - kubelet
+      - kubectl
+    state: present
+    update_cache: true
+
+- name: Join node to cluster
+  command: "{{ kubeadm_join_command }}"
+#  when: "'kubeadm' not in ansible_facts.packages"

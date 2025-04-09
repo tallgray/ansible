@@ -1,0 +1,10 @@
+---
+- name: Install common CLI tools
+  apt:
+    name:
+      - curl
+      - git
+      - vim
+      - htop
+    state: present
+    update_cache: yes

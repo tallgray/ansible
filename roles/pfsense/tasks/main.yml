@@ -1,0 +1,4 @@
+---
+# Placeholder - pfSense managed via API or manual config
+- debug:
+    msg: "pfSense configuration via Ansible coming soon."
