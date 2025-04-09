@@ -1,0 +1,22 @@
+# File: roles/elk/tasks/main.yml
+---
+- name: Deploy ELK stack
+  tags: [elk]
+  block:
+    - name: Ensure Docker Compose is installed
+      apt:
+        name: docker-compose
+        state: present
+        update_cache: true
+
+    - name: Copy ELK stack files
+      synchronize:
+        src: "{{ container_src_path }}/elk/"
+        dest: "{{ container_dest_path }}/elk/"
+        recursive: true
+      delegate_to: localhost
+
+    - name: Launch ELK stack
+      command: docker-compose up -d
+      args:
+        chdir: "{{ container_dest_path }}/elk"

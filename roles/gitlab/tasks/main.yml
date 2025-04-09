@@ -1,0 +1,22 @@
+# File: roles/gitlab/tasks/main.yml
+---
+- name: Deploy GitLab stack
+  tags: [gitlab]
+  block:
+    - name: Ensure Docker Compose is installed
+      apt:
+        name: docker-compose
+        state: present
+        update_cache: true
+
+    - name: Copy GitLab stack files
+      synchronize:
+        src: "{{ container_src_path }}/gitlab/"
+        dest: "{{ container_dest_path }}/gitlab/"
+        recursive: true
+      delegate_to: localhost
+
+    - name: Launch GitLab stack
+      command: docker-compose up -d
+      args:
+        chdir: "{{ container_dest_path }}/gitlab"

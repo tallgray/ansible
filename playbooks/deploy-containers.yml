@@ -1,0 +1,13 @@
+# playbooks/deploy-containers.yml
+# Run with 'ansible-playbook -i inventories/prod/hosts.ini playbooks/deploy-containers.yml --tags grafana'
+---
+- name: Deploy Dockerized services
+  hosts: docker
+  become: true
+  roles:
+    - grafana
+    - elk
+    - vault
+    - jenkins
+    - gitlab
+    - devops

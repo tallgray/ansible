@@ -99,4 +99,5 @@
 
 - name: Join node to cluster
   command: "{{ kubeadm_join_command }}"
+  when: kubeadm_join_command is defined
 #  when: "'kubeadm' not in ansible_facts.packages"

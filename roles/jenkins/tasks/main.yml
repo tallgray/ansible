@@ -1,0 +1,22 @@
+# File: roles/jenkins/tasks/main.yml
+---
+- name: Deploy Jenkins stack
+  tags: [jenkins]
+  block:
+    - name: Ensure Docker Compose is installed
+      apt:
+        name: docker-compose
+        state: present
+        update_cache: true
+
+    - name: Copy Jenkins stack files
+      synchronize:
+        src: "{{ container_src_path }}/jenkins/"
+        dest: "{{ container_dest_path }}/jenkins/"
+        recursive: true
+      delegate_to: localhost
+
+    - name: Launch Jenkins stack
+      command: docker-compose up -d
+      args:
+        chdir: "{{ container_dest_path }}/jenkins"

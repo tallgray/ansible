@@ -1,0 +1,31 @@
+# File: roles/grafana/tasks/main.yml
+---
+- name: Deploy Grafana stack
+  tags: [grafana]
+  block:
+    - name: Ensure Docker Compose is installed
+      apt:
+        name: docker-compose
+        state: present
+        update_cache: true
+
+    - name: Copy Grafana stack files
+      synchronize:
+        src: "{{ container_src_path }}/grafana/"
+        dest: "{{ container_dest_path }}/grafana/"
+        recursive: true
+      delegate_to: localhost
+
+    - name: Launch Grafana stack
+      command: docker-compose up -d
+      args:
+        chdir: "{{ container_dest_path }}/grafana"
+
+    - name: Check Grafana is up
+      uri:
+        url: http://localhost:3000
+        status_code: 200
+      register: grafana_health
+      retries: 5
+      delay: 10
+      until: grafana_health.status == 200

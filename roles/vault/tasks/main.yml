@@ -1,0 +1,22 @@
+# File: roles/vault/tasks/main.yml
+---
+- name: Deploy Vault stack
+  tags: [vault]
+  block:
+    - name: Ensure Docker Compose is installed
+      apt:
+        name: docker-compose
+        state: present
+        update_cache: true
+
+    - name: Copy Vault stack files
+      synchronize:
+        src: "{{ container_src_path }}/vault/"
+        dest: "{{ container_dest_path }}/vault/"
+        recursive: true
+      delegate_to: localhost
+
+    - name: Launch Vault stack
+      command: docker-compose up -d
+      args:
+        chdir: "{{ container_dest_path }}/vault"

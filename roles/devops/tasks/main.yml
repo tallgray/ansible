@@ -1,0 +1,22 @@
+# File: roles/devops/tasks/main.yml
+---
+- name: Deploy DevOps Toolbox container
+  tags: [devops]
+  block:
+    - name: Ensure Docker Compose is installed
+      apt:
+        name: docker-compose
+        state: present
+        update_cache: true
+
+    - name: Copy DevOps stack files
+      synchronize:
+        src: "{{ container_src_path }}/devops/"
+        dest: "{{ container_dest_path }}/devops/"
+        recursive: true
+      delegate_to: localhost
+
+    - name: Launch DevOps stack
+      command: docker-compose up -d
+      args:
+        chdir: "{{ container_dest_path }}/devops"
