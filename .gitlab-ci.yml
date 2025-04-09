@@ -16,3 +16,13 @@ syntax-check:
   stage: syntax-check
   script:
     - ansible-playbook --syntax-check -i inventories/dev/hosts.ini playbooks/site.yml
+
+test-inventory:
+  stage: syntax-check
+  script:
+    - ansible-inventory -i inventories/dev/hosts.ini --list
+
+test-all-playbooks:
+  stage: syntax-check
+  script:
+    - for pb in $(find playbooks -name '*.yml'); do ansible-playbook --syntax-check -i inventories/dev/hosts.ini $pb; done
