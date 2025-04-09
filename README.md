@@ -22,22 +22,23 @@ This project manages configuration and automation for a home lab and hybrid infr
 ### Sites
 
 Run against dev:
-
-\`\`\`bash
+```bash
 ansible-playbook -i inventories/dev/hosts.ini playbooks/site.yml
-\`\`\`
+```
 
 Run against prod:
-
-\`\`\`bash
+```bash
 ansible-playbook -i inventories/prod/hosts.ini playbooks/site.yml
-\`\`\`
+```
 
 ### K8S Control Plane
+
 ```bash
 ansible-playbook -i inventories/prod/hosts.ini playbooks/configure-k8s-control-plane.yml
 ```
+
 ### K8S Workers
+
 ```bash
 ansible-playbook -i inventories/prod/hosts.ini playbooks/configure-k8s-workers.yml -e "kubeadm_join_command='sudo kubeadm join <ip>:6443 --token <to>
 ```
