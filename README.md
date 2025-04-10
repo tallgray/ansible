@@ -1,4 +1,4 @@
-# Ansible Infrastructure Automation for tallgray.net
+# Ansible Infrastructure Automation
 
 This project manages configuration and automation for a home lab and hybrid infrastructure, including:
 
@@ -19,16 +19,32 @@ This project manages configuration and automation for a home lab and hybrid infr
 
 ## 🚀 Usage
 
-### Sites
+### Containers
 
 Run against dev:
 ```bash
-ansible-playbook -i inventories/dev/hosts.ini playbooks/site.yml
+# Per container
+ansible-playbook -i inventories/dev/hosts.ini playbooks/deploy-jenkins.yml --tags jenkins
+ansible-playbook -i inventories/dev/hosts.ini playbooks/deploy-vault.yml --tags vault
+ansible-playbook -i inventories/dev/hosts.ini playbooks/deploy-grafana.yml --tags grafana
+ansible-playbook -i inventories/dev/hosts.ini playbooks/deploy-elk.yml --tags elk 
+ansible-playbook -i inventories/dev/hosts.ini playbooks/deploy-devops.yml --tags devops
+ansible-playbook -i inventories/dev/hosts.ini playbooks/deploy-gitlab.yml --tags gitlab
+# All containers
+ansible-playbook -i inventories/dev/hosts.ini playbooks/deploy-containers.yml
 ```
 
 Run against prod:
 ```bash
-ansible-playbook -i inventories/prod/hosts.ini playbooks/site.yml
+# Per container
+ansible-playbook -i inventories/prod/hosts.ini playbooks/deploy-jenkins.yml --tags jenkins
+ansible-playbook -i inventories/prod/hosts.ini playbooks/deploy-vault.yml --tags vault
+ansible-playbook -i inventories/prod/hosts.ini playbooks/deploy-grafana.yml --tags grafana
+ansible-playbook -i inventories/prod/hosts.ini playbooks/deploy-elk.yml --tags elk
+ansible-playbook -i inventories/prod/hosts.ini playbooks/deploy-devops.yml --tags devops
+ansible-playbook -i inventories/prod/hosts.ini playbooks/deploy-gitlab.yml --tags gitlab
+# All containers
+ansible-playbook -i inventories/prod/hosts.ini playbooks/deploy-containers.yml
 ```
 
 ### K8S Control Plane
