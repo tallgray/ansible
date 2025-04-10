@@ -1,0 +1,6 @@
+---
+- name: Deploy Vault stack
+  hosts: docker
+  become: true
+  roles:
+  - containers/vault
