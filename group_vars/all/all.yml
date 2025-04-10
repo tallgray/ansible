@@ -2,6 +2,6 @@ ansible_user: tallgray1
 ansible_ssh_private_key_file: ~/.ssh/id_tallgray1
 ansible_python_interpreter: /usr/bin/python3
 
-# Added for container orchestration
+# This ensures the paths are shared across all roles without duplication or hardcoding.
 container_src_path: /home/tallgray1/projects/containers
 container_dest_path: /opt/docker-stacks
