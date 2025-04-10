@@ -1,0 +1,6 @@
+---
+- name: Deploy Elk stack
+  hosts: docker
+  become: true
+  roles:
+  - containers/elk

@@ -1,0 +1,6 @@
+---
+- name: Deploy Grafana stack
+  hosts: docker
+  become: true
+  roles:
+  - containers/grafana

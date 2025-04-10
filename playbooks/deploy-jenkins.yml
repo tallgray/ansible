@@ -1,0 +1,6 @@
+---
+- name: Deploy Jenkins stack
+  hosts: docker
+  become: true
+  roles:
+  - containers/jenkins

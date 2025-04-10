@@ -1,0 +1,6 @@
+---
+- name: Deploy Devops stack
+  hosts: docker
+  become: true
+  roles:
+  - containers/devops
