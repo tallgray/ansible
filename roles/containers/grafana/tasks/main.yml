@@ -1,7 +1,10 @@
-# File: roles/grafana/tasks/main.yml
+# File: roles/containers/grafana/tasks/main.yml
 ---
 - name: Deploy Grafana stack
   tags: [grafana]
+  vars:
+    container_src_path: /home/tallgray1/projects/containers
+    container_dest_path: /opt/docker-stacks
   block:
     - name: Ensure Docker Compose is installed
       apt:
@@ -9,23 +12,38 @@
         state: present
         update_cache: true
 
-    - name: Copy Grafana stack files
-      synchronize:
-        src: "{{ container_src_path }}/grafana/"
-        dest: "{{ container_dest_path }}/grafana/"
-        recursive: true
+    - name: Ensure destination directory exists
+      file:
+        path: "{{ container_dest_path }}/grafana"
+        state: directory
+        owner: tallgray1
+        group: tallgray1
+        mode: '0755'
+
+    - name: Copy Grafana docker-compose.yml to target host
+      copy:
+        src: "{{ container_src_path }}/grafana/docker-compose.yml"
+        dest: "{{ container_dest_path }}/grafana/docker-compose.yml"
+        owner: tallgray1
+        group: tallgray1
+        mode: '0644'
+
+    - name: Copy Grafana Dockerfile (if present)
+      stat:
+        path: "{{ container_src_path }}/grafana/Dockerfile"
+      register: dockerfile_check
       delegate_to: localhost
+
+    - name: Copy Dockerfile to target host
+      copy:
+        src: "{{ container_src_path }}/grafana/Dockerfile"
+        dest: "{{ container_dest_path }}/grafana/Dockerfile"
+        owner: tallgray1
+        group: tallgray1
+        mode: '0644'
+      when: dockerfile_check.stat.exists
 
     - name: Launch Grafana stack
       command: docker-compose up -d
       args:
         chdir: "{{ container_dest_path }}/grafana"
-
-    - name: Check Grafana is up
-      uri:
-        url: http://localhost:3000
-        status_code: 200
-      register: grafana_health
-      retries: 5
-      delay: 10
-      until: grafana_health.status == 200

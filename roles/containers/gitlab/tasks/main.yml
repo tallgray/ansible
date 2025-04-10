@@ -1,7 +1,10 @@
-# File: roles/gitlab/tasks/main.yml
+# File: roles/containers/gitlab/tasks/main.yml
 ---
-- name: Deploy GitLab stack
+- name: Deploy Gitlab stack
   tags: [gitlab]
+  vars:
+    container_src_path: /home/tallgray1/projects/containers
+    container_dest_path: /opt/docker-stacks
   block:
     - name: Ensure Docker Compose is installed
       apt:
@@ -9,14 +12,38 @@
         state: present
         update_cache: true
 
-    - name: Copy GitLab stack files
-      synchronize:
-        src: "{{ container_src_path }}/gitlab/"
-        dest: "{{ container_dest_path }}/gitlab/"
-        recursive: true
+    - name: Ensure destination directory exists
+      file:
+        path: "{{ container_dest_path }}/gitlab"
+        state: directory
+        owner: tallgray1
+        group: tallgray1
+        mode: '0755'
+
+    - name: Copy Gitlab docker-compose.yml to target host
+      copy:
+        src: "{{ container_src_path }}/gitlab/docker-compose.yml"
+        dest: "{{ container_dest_path }}/gitlab/docker-compose.yml"
+        owner: tallgray1
+        group: tallgray1
+        mode: '0644'
+
+    - name: Copy Gitlab Dockerfile (if present)
+      stat:
+        path: "{{ container_src_path }}/gitlab/Dockerfile"
+      register: dockerfile_check
       delegate_to: localhost
 
-    - name: Launch GitLab stack
+    - name: Copy Dockerfile to target host
+      copy:
+        src: "{{ container_src_path }}/gitlab/Dockerfile"
+        dest: "{{ container_dest_path }}/gitlab/Dockerfile"
+        owner: tallgray1
+        group: tallgray1
+        mode: '0644'
+      when: dockerfile_check.stat.exists
+
+    - name: Launch Gitlab stack
       command: docker-compose up -d
       args:
         chdir: "{{ container_dest_path }}/gitlab"

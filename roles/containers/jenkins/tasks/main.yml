@@ -1,7 +1,10 @@
-# File: roles/jenkins/tasks/main.yml
+# File: roles/containers/vault/tasks/main.yml
 ---
 - name: Deploy Jenkins stack
   tags: [jenkins]
+  vars:
+    container_src_path: /home/tallgray1/projects/containers
+    container_dest_path: /opt/docker-stacks
   block:
     - name: Ensure Docker Compose is installed
       apt:
@@ -9,12 +12,30 @@
         state: present
         update_cache: true
 
-    - name: Copy Jenkins stack files
-      synchronize:
-        src: "{{ container_src_path }}/jenkins/"
-        dest: "{{ container_dest_path }}/jenkins/"
-        recursive: true
-      delegate_to: localhost
+    - name: Ensure destination directory exists
+      file:
+        path: "{{ container_dest_path }}/jenkins"
+        state: directory
+        owner: tallgray1
+        group: tallgray1
+        mode: '0755'
+
+    - name: Copy Jenkins docker-compose.yml to target host
+      copy:
+        src: "{{ container_src_path }}/jenkins/docker-compose.yml"
+        dest: "{{ container_dest_path }}/jenkins/docker-compose.yml"
+        owner: tallgray1
+        group: tallgray1
+        mode: '0644'
+
+    - name: Copy Jenkins Dockerfile (optional)
+      copy:
+        src: "{{ container_src_path }}/jenkins/Dockerfile"
+        dest: "{{ container_dest_path }}/jenkins/Dockerfile"
+        owner: tallgray1
+        group: tallgray1
+        mode: '0644'
+      ignore_errors: true  # Only needed if your Jenkins stack builds a custom image
 
     - name: Launch Jenkins stack
       command: docker-compose up -d
