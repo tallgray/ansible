@@ -1,6 +1,10 @@
 ---
-- name: Deploy Devops stack
+- name: Deploy DevOps stack
   hosts: docker
   become: true
+  vars:
+    role_name: devops
+    container_src_path: /home/tallgray1/projects
+    container_dest_path: /opt/docker-stacks
   roles:
-  - containers/devops
+    - containers/devops

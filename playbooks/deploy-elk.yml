@@ -2,5 +2,9 @@
 - name: Deploy Elk stack
   hosts: docker
   become: true
+  vars:
+    role_name: elk
+    container_src_path: /home/tallgray1/projects
+    container_dest_path: /opt/docker-stacks
   roles:
-  - containers/elk
+    - containers/elk
