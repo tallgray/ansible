@@ -1,9 +1,6 @@
 ---
 - name: "Deploy {{ role_name | default('container') | capitalize }} stack"
-  tags: ["{{ role_name | default('container') }}"]
-  vars:
-    container_src_path: /home/tallgray1/projects/containers
-    container_dest_path: /opt/docker-stacks
+  tags: ["grafana"]
   block:
     - name: Ensure Docker Compose is installed
       apt:
@@ -19,13 +16,22 @@
         group: tallgray1
         mode: '0755'
 
+    - name: Set container path facts on localhost
+      set_fact:
+        container_src_path: "{{ container_src_path }}"
+        container_dest_path: "{{ container_dest_path }}"
+      delegate_to: localhost
+
     - name: Copy full container directory from source-of-truth
       synchronize:
         src: "{{ container_src_path }}/{{ role_name }}/"
         dest: "{{ container_dest_path }}/{{ role_name }}/"
+        mode: push
+        recursive: yes
         rsync_opts:
           - "--delete"
       delegate_to: localhost
+      become: false
 
     - name: Check if Dockerfile exists in source
       stat:

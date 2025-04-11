@@ -1,10 +1,6 @@
-# File: roles/containers/vault/tasks/main.yml
 ---
-- name: Deploy Jenkins stack
-  tags: [jenkins]
-  vars:
-    container_src_path: /home/tallgray1/projects/containers
-    container_dest_path: /opt/docker-stacks
+- name: "Deploy {{ role_name | default('container') | capitalize }} stack"
+  tags: ["jenkins"]
   block:
     - name: Ensure Docker Compose is installed
       apt:
@@ -14,30 +10,45 @@
 
     - name: Ensure destination directory exists
       file:
-        path: "{{ container_dest_path }}/jenkins"
+        path: "{{ container_dest_path }}/{{ role_name }}"
         state: directory
         owner: tallgray1
         group: tallgray1
         mode: '0755'
 
-    - name: Copy Jenkins docker-compose.yml to target host
+    - name: Set container path facts on localhost
+      set_fact:
+        container_src_path: "{{ container_src_path }}"
+        container_dest_path: "{{ container_dest_path }}"
+      delegate_to: localhost
+
+    - name: Copy full container directory from source-of-truth
+      synchronize:
+        src: "{{ container_src_path }}/{{ role_name }}/"
+        dest: "{{ container_dest_path }}/{{ role_name }}/"
+        mode: push
+        recursive: yes
+        rsync_opts:
+          - "--delete"
+      delegate_to: localhost
+      become: false
+
+    - name: Check if Dockerfile exists in source
+      stat:
+        path: "{{ container_src_path }}/{{ role_name }}/Dockerfile"
+      register: dockerfile_check
+      delegate_to: localhost
+
+    - name: Copy Dockerfile separately (if it exists)
       copy:
-        src: "{{ container_src_path }}/jenkins/docker-compose.yml"
-        dest: "{{ container_dest_path }}/jenkins/docker-compose.yml"
+        src: "{{ container_src_path }}/{{ role_name }}/Dockerfile"
+        dest: "{{ container_dest_path }}/{{ role_name }}/Dockerfile"
         owner: tallgray1
         group: tallgray1
         mode: '0644'
+      when: dockerfile_check.stat.exists
 
-    - name: Copy Jenkins Dockerfile (optional)
-      copy:
-        src: "{{ container_src_path }}/jenkins/Dockerfile"
-        dest: "{{ container_dest_path }}/jenkins/Dockerfile"
-        owner: tallgray1
-        group: tallgray1
-        mode: '0644'
-      ignore_errors: true  # Only needed if your Jenkins stack builds a custom image
-
-    - name: Launch Jenkins stack
+    - name: Launch container stack
       command: docker-compose up -d
       args:
-        chdir: "{{ container_dest_path }}/jenkins"
+        chdir: "{{ container_dest_path }}/{{ role_name }}"

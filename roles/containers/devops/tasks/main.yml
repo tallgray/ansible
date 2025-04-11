@@ -1,10 +1,6 @@
-# File: roles/containers/devops/tasks/main.yml
 ---
-- name: Deploy Devops stack
-  tags: [devops]
-  vars:
-    container_src_path: /home/tallgray1/projects/containers
-    container_dest_path: /opt/docker-stacks
+- name: "Deploy {{ role_name | default('container') | capitalize }} stack"
+  tags: ["devops"]
   block:
     - name: Ensure Docker Compose is installed
       apt:
@@ -14,36 +10,45 @@
 
     - name: Ensure destination directory exists
       file:
-        path: "{{ container_dest_path }}/devops"
+        path: "{{ container_dest_path }}/{{ role_name }}"
         state: directory
         owner: tallgray1
         group: tallgray1
         mode: '0755'
 
-    - name: Copy Devops docker-compose.yml to target host
-      copy:
-        src: "{{ container_src_path }}/devops/docker-compose.yml"
-        dest: "{{ container_dest_path }}/devops/docker-compose.yml"
-        owner: tallgray1
-        group: tallgray1
-        mode: '0644'
+    - name: Set container path facts on localhost
+      set_fact:
+        container_src_path: "{{ container_src_path }}"
+        container_dest_path: "{{ container_dest_path }}"
+      delegate_to: localhost
 
-    - name: Copy Devops Dockerfile (if present)
+    - name: Copy full container directory from source-of-truth
+      synchronize:
+        src: "{{ container_src_path }}/{{ role_name }}/"
+        dest: "{{ container_dest_path }}/{{ role_name }}/"
+        mode: push
+        recursive: yes
+        rsync_opts:
+          - "--delete"
+      delegate_to: localhost
+      become: false
+
+    - name: Check if Dockerfile exists in source
       stat:
-        path: "{{ container_src_path }}/devops/Dockerfile"
+        path: "{{ container_src_path }}/{{ role_name }}/Dockerfile"
       register: dockerfile_check
       delegate_to: localhost
 
-    - name: Copy Dockerfile to target host
+    - name: Copy Dockerfile separately (if it exists)
       copy:
-        src: "{{ container_src_path }}/devops/Dockerfile"
-        dest: "{{ container_dest_path }}/devops/Dockerfile"
+        src: "{{ container_src_path }}/{{ role_name }}/Dockerfile"
+        dest: "{{ container_dest_path }}/{{ role_name }}/Dockerfile"
         owner: tallgray1
         group: tallgray1
         mode: '0644'
       when: dockerfile_check.stat.exists
 
-    - name: Launch Devops stack
+    - name: Launch container stack
       command: docker-compose up -d
       args:
-        chdir: "{{ container_dest_path }}/devops"
+        chdir: "{{ container_dest_path }}/{{ role_name }}"
