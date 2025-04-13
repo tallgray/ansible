@@ -63,4 +63,4 @@ ansible-playbook -i inventories/prod/hosts.ini playbooks/configure-k8s-workers.y
 
 - Uses key \`~/.ssh/id_tallgray1\`
 - AWS config in \`~/.aws/config\`
-- Git user: Glenn Gray (\`tallgray1@gmail.com\`)
+
